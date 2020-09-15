@@ -1,0 +1,42 @@
+study("DEMA ATR Channels", overlay = true)
+// Similar to my "ATR Channels" indicator (https://www.tradingview.com/script/RTWSC7RM-ATR-Channels/),
+// but using Double Exponential Moving Averages (DEMA).
+// ATR channel idea from Kerry Lovvorn as mentioned in Elder's "New Trading for a Living"
+// Added an optional fill to highlight the difference between fast and slow DEMAs.
+
+// Inputs
+fastLength = input(12, minval=1, title="Fast DEMA Length")
+slowLength = input(26, minval=1, title="Slow DEMA Length (Channel Base)")
+showFastDema = input(true, title="Show Fast DEMA")
+showSlowDema = input(true, title="Show Slow DEMA (Channel Base)")
+showDemaFill = input(true, title="Show DEMA Fill")
+showAtrSet1 = input(true, title="Show 1st ATR Set")
+showAtrSet2 = input(true, title="Show 2nd ATR Set")
+showAtrSet3 = input(true, title="Show 3rd ATR Set")
+
+// DEMAs
+slowDema = (2 * ema(close, slowLength) - (ema(ema(close, slowLength), slowLength)))
+fastDema = (2 * ema(close, fastLength) - (ema(ema(close, fastLength), fastLength)))
+
+// ATR
+atr = rma(tr(true), slowLength)
+demaPlus1Atr = slowDema + atr
+demaPlus2Atr = slowDema + (atr * 2)
+demaPlus3Atr = slowDema + (atr * 3)
+demaMinus1Atr = slowDema - atr
+demaMinus2Atr = slowDema - (atr * 2)
+demaMinus3Atr = slowDema - (atr * 3)
+
+// Plots
+pltslowDema = plot(showSlowDema ? slowDema : na, title="Slow DEMA", color=yellow)
+pltfastDema = plot(showFastDema ? fastDema : na, title="Fast DEMA", color=orange)
+plot(showAtrSet1 ? demaPlus1Atr : na, title="+1 ATR", color=gray)
+plot(showAtrSet2 ? demaPlus2Atr : na, title="+2 ATR", color=gray)
+plot(showAtrSet3 ? demaPlus3Atr : na, title="+3 ATR", color=gray)
+plot(showAtrSet1 ? demaMinus1Atr : na, title="-1 ATR", color=gray)
+plot(showAtrSet2 ? demaMinus2Atr : na, title="-2 ATR", color=gray)
+plot(showAtrSet3 ? demaMinus3Atr : na, title="-3 ATR", color=gray)
+
+demaFillTransp = showDemaFill ? 80 : 100
+fill(pltslowDema, pltfastDema, transp = demaFillTransp, color = fastDema > slowDema ? #66BB6A : #900000)
+EOF 
